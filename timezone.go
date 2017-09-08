@@ -1,18 +1,17 @@
 package timezone
 
 import (
-	"time"
 	"strconv"
 )
 
-func stringToDuration(str string) time.Duration {
+func stringToMinutes(str string) int {
 	negate := 1
 	if str[0] == '-' {
 		negate = -1
 	}
 	hour, _ := strconv.ParseInt(str[1:3], 10, 8)
 	min, _ := strconv.ParseInt(str[4:], 10, 8)
-	return (time.Hour * time.Duration(hour) + time.Minute * time.Duration(min)) * time.Duration(negate)
+	return int(hour * 60 + min) * negate
 }
 
 func Exists(name string) (ok bool) {
@@ -20,9 +19,19 @@ func Exists(name string) (ok bool) {
 	return
 }
 
+func Entry(name string) TimezoneEntry {
+	offset, ok := timezoneList[name]
+	if !ok {
+		return TimezoneEntry{name,"+00:00",0}
+	}
+	n := stringToMinutes(offset)
+	return TimezoneEntry{name,offset,n}
+}
+
 func Entries() (out []TimezoneEntry) {
 	for k,v := range timezoneList {
-		out = append(out, TimezoneEntry{k, v})
+		n := stringToMinutes(v)
+		out = append(out, TimezoneEntry{k, v, n})
 	}
 	return
 }
@@ -34,9 +43,9 @@ func Names() (out []string) {
 	return
 }
 
-func Offset(name string) (dur time.Duration, ok bool) {
+func Offset(name string) (minutes int, ok bool) {
 	if val, ok := timezoneList[name]; ok {
-		return stringToDuration(val), true
+		return stringToMinutes(val), true
 	} else {
 		return 0, false
 	}
@@ -47,8 +56,9 @@ func OffsetText(name string) string {
 }
 
 type TimezoneEntry struct {
-	Name 	string
-	Offset  string
+	Name 			string		`json:"name"`
+	Offset  		string		`json:"offset"`
+	OffsetMinutes 	int			`json:"offsetMinutes"`
 }
 
 var timezoneList = map[string]string {
