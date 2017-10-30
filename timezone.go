@@ -62,6 +62,7 @@ type TimezoneEntry struct {
 }
 
 var timezoneList = map[string]string {
+	"UTC":	                "+00:00",
 	//   "Asia/Kabul":	        "+04:30",
 	"Europe/Mariehamn":	    "+02:00",
 	"Europe/Tirane":	    "+01:00",
